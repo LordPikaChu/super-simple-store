@@ -3,21 +3,23 @@ import { initializeStore } from './actions.js';
 
 export function createStore(reducer) {
   const state = createSubject(void 0);
-  const subscribers = [];
 
   function getState() {
     return state.getValue();
   }
 
   function dispatch(action) {
-    state.next(reducer(state.getValue(), action));
+    const nextState = reducer(getState(), action);
+    state.next(nextState);
   }
 
   function select(selector) {
-    const subject = createSubject(selector(state.getValue()));
+    const initialValue = selector(getState());
+    const subject = createSubject(initialValue);
 
     state.subscribe((nextState) => {
-      subject.next(selector(nextState));
+      const nextValue = selector(nextState);
+      subject.next(nextValue);
     });
 
     return subject;
